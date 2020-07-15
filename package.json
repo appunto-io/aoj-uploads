@@ -1,0 +1,32 @@
+{
+  "name": "@appunto/aoj-uploads",
+  "version": "0.0.1",
+  "description": "Uploads model for API on JSON framework",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "mocha './src/**/*.test.js' --timeout 50000 --exit",
+    "doc": "jsdoc -c jsdoc.conf.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/appunto-io/aoj-uploads.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/appunto-io/aoj-uploads/issues"
+  },
+  "homepage": "https://github.com/appunto-io/aoj-uploads#readme",
+  "devDependencies": {
+    "eslint": "^5.0.1",
+    "eslint-loader": "^2.0.0",
+    "yargs": "^10.0.3"
+  },
+  "dependencies": {
+    "@appunto/api-on-json": "^0.1.6",
+    "express-fileupload": "^1.1.6",
+    "lodash.kebabcase": "^4.1.1",
+    "mv": "^2.1.1",
+    "uuid": "^3.3.2"
+  }
+}
