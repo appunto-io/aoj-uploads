@@ -1,28 +1,13 @@
-const fs     = require('fs');
-const mv     = require('mv');
-const uuidv1 = require('uuid/v1');
+const fs = require('fs');
+
+const LocalFilesHandler = require('../handlers/local');
+
 
 const {
   NO_CONSTRAINTS,
   DEFAULT_NAME,
   DEFAULT_FIELD
 } = require('./constants');
-
-const renamePromise = (oldPath, newPath) => new Promise((resolve, reject) => {
-  mv(oldPath, newPath, (err) => {
-    if (err) {reject(err);}
-    else     {resolve();}
-  });
-});
-
-
-const readPromise = (path) => new Promise((resolve, reject) => {
-  fs.readFile(path, (err, data) => {
-    if (err) {reject(err);}
-    else     {resolve(data);}
-  });
-});
-
 
 /*
 Verifies that file is available in request body, that its size is ok and
@@ -91,27 +76,21 @@ const storeFile = (options) => async (data, flow, meta) => {
   console.info('uploadModel.storeFile()');
 
   const { file }    = data;
-  const storagePath = options.storagePath || './';
+  let handler       = options.handler;
 
-  if (!options.storagePath) {
-    console.warn(
-      'uploadModel.storeFile(): storage folder not specified, using "./" instead. ' +
-      'Please set options.storagePath="/path/to/your/storage/folder/".'
-    );
+  if (!handler) {
+    console.warn('uploadModel.storeFile(): Upload handler is not defined, using default LocalFilesHandler');
+    handler = LocalFilesHandler;
   }
 
-  const uuid            = uuidv1();
   const uploadPath      = file.tempFilePath;
-  const destinationPath = `${storagePath}/${uuid}`;
   const ownerId         = meta.auth.accountId || null;
 
   try {
-    await renamePromise(uploadPath, destinationPath);
-
     return flow.continue({
       name        : file.name,
       ownerId     : ownerId,
-      storageName : uuid,
+      storageName : await handler.store(uploadPath, options),
       mime        : file.mimetype,
       size        : file.size
     });
@@ -127,27 +106,22 @@ const storeFile = (options) => async (data, flow, meta) => {
 const deleteFile = (options) => async (data, flow, meta) => {
   console.info('UploadModel.deleteFile()');
 
-  let { storagePath, collection } = options;
+  let { collection } = options;
   const { db } = meta.environment || {};
+
+  let handler = options.handler;
+
+  if (!handler) {
+    console.warn('uploadModel.getFile(): Upload handler is not defined, using default LocalFilesHandler');
+    handler = LocalFilesHandler;
+  }
 
   collection = collection || DEFAULT_NAME;
 
   const id                   = meta.request.params.id || null;
   const document             = await db.readOne(collection, id);
-  const { storageName = '' } = document;
 
-  const storageFile = `${storagePath}/${storageName}`;
-
-  if (!options.storagePath) {
-    console.error(
-      'uploadModel.deleteFile(): storage folder not specified. ' +
-      `Unable to delete file ${storageName} from ${options.collection} storage. ` +
-      'Please set options.storagePath="/path/to/your/storage/folder/".'
-    );
-  }
-  else {
-    fs.unlinkSync(storageFile);
-  }
+  await handler.del(document, options);
 
   return flow.continue(data);
 };
@@ -156,23 +130,20 @@ const deleteFile = (options) => async (data, flow, meta) => {
 const getFile = (options) => async (data, flow, meta) => {
   console.info('UploadModel.getFile()');
 
-  let { storagePath, collection, attachment } = options;
+  let { collection } = options;
   const { db } = meta.environment || {};
+  let handler = options.handler;
+
+  if (!handler) {
+    console.warn('uploadModel.getFile(): Upload handler is not defined, using default LocalFilesHandler');
+    handler = LocalFilesHandler;
+  }
 
   collection = collection || DEFAULT_NAME;
 
   const id = meta.request.params.id || null;
 
-  if (!options.storagePath) {
-    console.error(
-      'uploadModel.getFile(): storage folder not specified. Unable to serve requested file. ' +
-      'Please set options.storagePath="/path/to/your/storage/folder/".'
-    );
-
-    return flow.stop(404, 'Unable to find storage folder');
-  }
-
-  if (!options.storagePath) {
+  if (!id) {
     console.error('uploadModel.getFile(): file id not specified.');
 
     return flow.stop(404);
@@ -182,19 +153,7 @@ const getFile = (options) => async (data, flow, meta) => {
     const document = await db.readOne(collection, id);
 
     if (document) {
-      const { storageName, name, mime } = document;
-
-      const storageFile = `${storagePath}/${storageName}`;
-      const data        = await readPromise(storageFile);
-
-      const disposition = attachment ? `attachment; filename="${encodeURIComponent(name)}"` : 'inline';
-
-      meta.response.headers['Content-Disposition'] = disposition;
-      meta.response.headers['Content-Type'] = mime;
-      meta.response.headers['Cache-Control'] = 'max-age=86400';
-      // meta.response.sendRaw = true;
-
-      return flow.continue(data);
+      return await handler.get(flow, meta, document, options);
     }
 
     return flow.stop(404);
