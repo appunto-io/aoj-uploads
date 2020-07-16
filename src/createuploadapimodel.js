@@ -7,7 +7,7 @@ const { uploadApiModel }      = require('./model/api.js');
 function createUploadApiModel(options = {}) {
   const apiName     = options.apiName || kebabCase(options.collection) || DEFAULT_NAME;
   const tempFileDir = options.tempFileDir || __dirname + '/tmp/';
-
+  const maxFileSize = options.maxFileSize || 50 * 1024 * 1024;
 
   const dataModel        = new DataModel(uploadDataModel(options));
   const apiFromDataModel = dataModel.toApi();
@@ -20,7 +20,7 @@ function createUploadApiModel(options = {}) {
   apiModel.addModel(renamedApiFromDataModel);
 
   apiModel.addMiddleware(fileUpload({
-    limits: { fileSize: 50 * 1024 * 1024 },
+    limits: { fileSize: maxFileSize },
     useTempFiles: true,
     tempFileDir
   })
