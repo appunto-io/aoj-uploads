@@ -91,7 +91,7 @@ async function getBinary(port, collection, id) {
   Testsuite
 */
 
-async function databaseTestSuite(defaultsServerPort, optionsServerPort) {
+async function defaultTestSuite(defaultsServerPort) {
   describe('Uploads library test suite', async function() {
     describe('Default options', async function() {
       it('Should send file to server', async function() {
@@ -127,7 +127,11 @@ async function databaseTestSuite(defaultsServerPort, optionsServerPort) {
         expect(response).to.have.status(404);
       })
     });
+  });
+};
 
+async function testSuiteWithOptions(optionsServerPort) {
+  describe('Uploads library test suite', async function() {
     describe('Custom options', async function() {
       it('Should send file to server', async function() {
         const response = await postFile(optionsServerPort, 'apiName', './testfile.pdf', 'testfile.pdf', 'uploadfilefield');
@@ -180,6 +184,7 @@ async function databaseTestSuite(defaultsServerPort, optionsServerPort) {
 
 
 module.exports = {
-  databaseTestSuite,
+  defaultTestSuite,
+  testSuiteWithOptions,
   jwtSecret
 }

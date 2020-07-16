@@ -61,7 +61,7 @@ const LocalFilesHandler = {
     return flow.continue(data);
   },
 
-  del : (document, options) => {
+  del : async (document, options) => {
     const { storageName = '' } = document;
     const storageFile = `${options.storagePath}/${storageName}`;
 

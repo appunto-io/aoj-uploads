@@ -5,7 +5,8 @@ const { Mongo, DataModel }  = require('@appunto/api-on-json');
 const { createUploadApiModel } = require('../src/index');
 
 const {
-  databaseTestSuite,
+  defaultTestSuite,
+  testSuiteWithOptions,
   jwtSecret } = require('./all-generic.js');
 
 describe('aoj-uploads test suite mongoose', async function() {
@@ -51,5 +52,6 @@ describe('aoj-uploads test suite mongoose', async function() {
     await this.mongoServer.stop();
   });
 
-  databaseTestSuite(3003, 3004);
+  defaultTestSuite(3003);
+  testSuiteWithOptions(3004);
 });
