@@ -1,3 +1,9 @@
+const kebabCase = require('lodash.kebabcase');
+
+const {
+  DEFAULT_NAME
+} = require('./constants');
+
 const {
   verifyFile,
   storeFile,

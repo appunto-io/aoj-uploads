@@ -4,7 +4,8 @@ const uuidv1 = require('uuid/v1');
 
 const {
   NO_CONSTRAINTS,
-  DEFAULT_NAME
+  DEFAULT_NAME,
+  DEFAULT_FIELD
 } = require('./constants');
 
 const renamePromise = (oldPath, newPath) => new Promise((resolve, reject) => {
@@ -32,10 +33,10 @@ const verifyFile = (options) => async (data, flow, meta) => {
 
   let {accept, fileField, maxSize} = options;
 
-  fileField = fileField || 'file';
+  fileField = fileField || DEFAULT_FIELD;
 
   if (accept) {
-    accept = Array.isArray(accept) ? array : [array];
+    accept = Array.isArray(accept) ? accept : [accept];
   }
   else {
     accept = NO_CONSTRAINTS;
@@ -69,13 +70,15 @@ const verifyFile = (options) => async (data, flow, meta) => {
     return flow.stop(413, `Maximum allowed file size is ${maxSize}`);
   }
 
-  if (accept !== NO_CONSTRAINTS && accept.indexOf(file.type) === -1) {
+  if (accept !== NO_CONSTRAINTS && accept.indexOf(file.mimetype) === -1) {
     fs.unlink(file.tempFilePath, (err)=> {
       if (err) {
         console.warn(`uploadModel.verifyFile(): unable to remove file '${file.tempFilePath}'`);
       }
     });
-    return flow.stop(415, `File format '${file.type}' is not allowed. Accepted formats are : ${accept.join(', ')}`);
+
+    console.info(`File format '${file.mimetype}' is not allowed. Accepted formats are : ${accept.join(', ')}`);
+    return flow.stop(415, `File format '${file.mimetype}' is not allowed. Accepted formats are : ${accept.join(', ')}`);
   }
 
   return flow.continue({file});
@@ -103,7 +106,6 @@ const storeFile = (options) => async (data, flow, meta) => {
   const ownerId         = meta.auth.accountId || null;
 
   try {
-    console.log(file)
     await renamePromise(uploadPath, destinationPath);
 
     return flow.continue({
@@ -125,8 +127,10 @@ const storeFile = (options) => async (data, flow, meta) => {
 const deleteFile = (options) => async (data, flow, meta) => {
   console.info('UploadModel.deleteFile()');
 
-  const { storagePath, collection } = options;
+  let { storagePath, collection } = options;
   const { db } = meta.environment || {};
+
+  collection = collection || DEFAULT_NAME;
 
   const id                   = meta.request.params.id || null;
   const document             = await db.readOne(collection, id);
@@ -188,7 +192,7 @@ const getFile = (options) => async (data, flow, meta) => {
       meta.response.headers['Content-Disposition'] = disposition;
       meta.response.headers['Content-Type'] = mime;
       meta.response.headers['Cache-Control'] = 'max-age=86400';
-      meta.response.sendRaw = true;
+      // meta.response.sendRaw = true;
 
       return flow.continue(data);
     }

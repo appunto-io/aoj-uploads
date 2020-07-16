@@ -27,4 +27,5 @@ yarn-error.log*
 /docs
 /dist
 
-/dev/files
+/test/var/*
+!/test/var/keep

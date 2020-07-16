@@ -1,4 +1,5 @@
 module.exports = {
-  NO_CONSTRAINTS: '*',
-  DEFAULT_NAME: 'uploads'
+  NO_CONSTRAINTS : '*',
+  DEFAULT_NAME   : 'uploads',
+  DEFAULT_FIELD  : 'file'
 }
