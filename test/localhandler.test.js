@@ -4,6 +4,8 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 const { Mongo, DataModel }  = require('@appunto/api-on-json');
 const { createUploadApiModel } = require('../src/index');
 
+const DummyGenerator = require('../src/generators/dummy');
+
 const {
   defaultTestSuite,
   testSuiteWithOptions,
@@ -32,6 +34,10 @@ describe('aoj-uploads test suite mongoose', async function() {
         attachment  : true,
         handlerOptions : {
           storagePath : './test/var',
+        },
+        generator : DummyGenerator,
+        generatorOptions : {
+          variantIds : ['small', 'medium', 'big']
         }
       });
 

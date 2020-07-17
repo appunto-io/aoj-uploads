@@ -6,6 +6,7 @@ const {
 
 const {
   verifyFile,
+  generateVariants,
   storeFile,
   deleteFile,
   getFile
@@ -19,6 +20,7 @@ const uploadApiModel = (options = {}) => {
       handlers : {
         'POST' : [
           verifyFile(options),
+          generateVariants(options),
           storeFile(options)
         ]
       },
@@ -40,6 +42,16 @@ const uploadApiModel = (options = {}) => {
           },
           handlers : {
             'GET' : [getFile(options)]
+          },
+          '/:variantId' : {
+            auth : {
+              'read'  : false,
+              'write' : false,
+              'GET'   : {requiresAuth : false}
+            },
+            handlers : {
+              'GET' : [getFile(options)]
+            }
           }
         }
       }

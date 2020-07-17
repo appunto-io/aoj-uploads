@@ -6,8 +6,15 @@ const uploadDataModel = (options = {}) => ({
       'name'        : {type : 'String', required : true},
       'ownerId'     : {type : 'Id', collection : options.ownerCollection || 'accounts'},
       'storageName' : {type : 'String', required : true},
-      'mime'        : {type : 'String'},
-      'size'        : {type : 'Number'}
+      'mimetype'    : {type : 'String'},
+      'size'        : {type : 'Number'},
+      'variants'    : [{
+        'variantId'   : {type : 'String', required : true},
+        'name'        : {type : 'String', required : true},
+        'storageName' : {type : 'String', required : true},
+        'mimetype'    : {type : 'String'},
+        'size'        : {type : 'Number'}
+      }]
     }
   }
 });

@@ -80,9 +80,9 @@ async function postFile(port, collection, filePath, fileName, fileField = 'file'
   return r;
 }
 
-async function getBinary(port, collection, id) {
+async function getBinary(port, collection, id, variant) {
   return chai.request('http://localhost:' + port)
-    .get(`/${collection}/${id}/binary`)
+    .get(`/${collection}/${id}/binary` + (variant ? `/${variant}` : ''))
     .set('Authorization', token);
 }
 
@@ -109,6 +109,7 @@ async function defaultTestSuite(defaultsServerPort) {
         expect(response.body.id).to.equal(this.fileId);
         expect(response.body.storageName).to.equal(this.storageName);
         expect(response.body.name).to.equal('testfile.pdf');
+        expect(response.body.mimetype).to.equal('application/pdf');
       })
 
       it('Should retrieve binary', async function() {
@@ -161,6 +162,17 @@ async function testSuiteWithOptions(optionsServerPort) {
         expect(response.body.id).to.equal(this.fileId);
         expect(response.body.storageName).to.equal(this.storageName);
         expect(response.body.name).to.equal('testfile.pdf');
+        expect(response.body.mimetype).to.equal('application/pdf');
+        expect(response.body.variants.length).to.equal(3);
+        expect(response.body.variants[0].variantId).to.equal('small');
+        expect(response.body.variants[0].name).to.equal('small_testfile.pdf');
+        expect(response.body.variants[0].mimetype).to.equal('application/pdf');
+        expect(response.body.variants[1].variantId).to.equal('medium');
+        expect(response.body.variants[1].name).to.equal('medium_testfile.pdf');
+        expect(response.body.variants[1].mimetype).to.equal('application/pdf');
+        expect(response.body.variants[2].variantId).to.equal('big');
+        expect(response.body.variants[2].name).to.equal('big_testfile.pdf');
+        expect(response.body.variants[2].mimetype).to.equal('application/pdf');
       })
 
       it('Should retrieve binary', async function() {
@@ -168,6 +180,19 @@ async function testSuiteWithOptions(optionsServerPort) {
 
         expect(response).to.have.status(200);
       });
+
+      it('Should retrieve binary with variant', async function() {
+        const response = await getBinary(optionsServerPort, 'apiName', this.fileId, 'small');
+
+        expect(response).to.have.status(200);
+      });
+
+      it('Should return 404 on unknown variant', async function() {
+        const response = await getBinary(optionsServerPort, 'apiName', this.fileId, 'unknown-variant');
+
+        expect(response).to.have.status(404);
+      });
+
 
       it('Should delete file', async function() {
         let response = await erase(optionsServerPort, 'apiName', this.fileId);

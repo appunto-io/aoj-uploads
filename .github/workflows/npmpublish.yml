@@ -3,7 +3,7 @@ name: Appunto Publish
 on:
   push:
     tags:
-      - '*version*'
+      - 'v*'
 
 jobs:
   publish-npm:

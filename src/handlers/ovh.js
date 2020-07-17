@@ -28,7 +28,7 @@ const OvhObjectStorageHandler = {
     return uuid;
   },
 
-  get : async (document, options) => {
+  get : async (storageName, options) => {
     (names => {
       names.forEach(name => {
         if (!options[name]) {
@@ -44,8 +44,6 @@ const OvhObjectStorageHandler = {
       tenantId : options.ovhTenantId,
       region   : options.ovhRegion
     };
-
-    const { storageName } = document;
 
 		const storage = new OVHStorage(config);
 
@@ -55,7 +53,7 @@ const OvhObjectStorageHandler = {
     return content;
   },
 
-  del : async (document, options) => {
+  del : async (storageName, options) => {
     (names => {
       names.forEach(name => {
         if (!options[name]) {
@@ -71,8 +69,6 @@ const OvhObjectStorageHandler = {
       tenantId : options.ovhTenantId,
       region   : options.ovhRegion
     };
-
-    const { storageName } = document;
 
 		const storage = new OVHStorage(config);
 
