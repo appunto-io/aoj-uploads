@@ -2,8 +2,7 @@ const mongoose              = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 const { Mongo }  = require('@appunto/api-on-json');
-const { createUploadApiModel } = require('../src/index');
-
+const { createUploadApiModel, ImageResizer } = require('../src/index');
 const jwtSecret = "--default-jwt-secret--";
 
 let mongoServer = new MongoMemoryServer();
@@ -16,12 +15,33 @@ mongoServer
   const { dataModel, apiModel } = createUploadApiModel({
     apiName     : 'apiName',
     collection  : 'secondTestTable',
-    accept      : 'application/pdf',
+    accept      : ['image/png', 'image/jpeg'],
     fileField   : 'uploadfilefield',
-    maxSize     : 1500000,
+    maxSize     : 500000000,
     attachment  : true,
     handlerOptions : {
       storagePath : './test/var',
+    },
+    generator : ImageResizer,
+    generatorOptions : {
+      sizes : [
+        {
+          width : 50,
+          height : 50,
+          id : 'tiny',
+          format : 'png',
+          nameFormat : '{{ name }}{{ ext }}'
+        },
+        {
+          width : 300,
+          height : 300,
+          id : 'small',
+          format : 'jpeg',
+          fit : 'outside',
+          position : 'left bottom',
+          nameFormat : '{{ base }}.jpeg'
+        }
+      ]
     }
   });
 
@@ -31,5 +51,5 @@ mongoServer
 
   server = apiModel.toServer({db, jwtSecret});
 
-  await server.listen(3003);
+  await server.listen(3010);
 });
