@@ -90,7 +90,7 @@ const storeFile = (options) => async (data, flow, meta) => {
     return flow.continue({
       name        : file.name,
       ownerId     : ownerId,
-      storageName : await handler.store(uploadPath, options),
+      storageName : await handler.store(uploadPath, options.handlerOptions || {}),
       mime        : file.mimetype,
       size        : file.size
     });
@@ -121,7 +121,7 @@ const deleteFile = (options) => async (data, flow, meta) => {
   const id                   = meta.request.params.id || null;
   const document             = await db.readOne(collection, id);
 
-  await handler.del(document, options);
+  await handler.del(document, options.handlerOptions || {});
 
   return flow.continue(data);
 };
@@ -153,7 +153,14 @@ const getFile = (options) => async (data, flow, meta) => {
     const document = await db.readOne(collection, id);
 
     if (document) {
-      return await handler.get(flow, meta, document, options);
+      const { name, mime } = document;
+      const disposition = options.attachment ? `attachment; filename="${encodeURIComponent(name)}"` : 'inline';
+
+      meta.response.headers['Content-Disposition'] = disposition;
+      meta.response.headers['Content-Type']        = mime;
+      meta.response.headers['Cache-Control']       = 'max-age=86400';
+
+      return flow.continue(await handler.get(document, options.handlerOptions || {}));
     }
 
     return flow.stop(404);

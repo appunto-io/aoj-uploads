@@ -19,11 +19,13 @@ describe('aoj-uploads test suite mongoose', async function() {
 
       const { dataModel, apiModel } = createUploadApiModel({
         handler : OvhObjectStorageHandler,
-        ovhUsername  : process.env.OVH_USERNAME,
-        ovhPassword  : process.env.OVH_PASSWORD,
-        ovhTenantId  : process.env.OVH_TENANTID,
-        ovhRegion    : process.env.OVH_REGION,
-        ovhContainer : process.env.OVH_CONTAINER
+        handlerOptions : {
+          ovhUsername  : process.env.OVH_USERNAME,
+          ovhPassword  : process.env.OVH_PASSWORD,
+          ovhTenantId  : process.env.OVH_TENANTID,
+          ovhRegion    : process.env.OVH_REGION,
+          ovhContainer : process.env.OVH_CONTAINER
+        }
       });
 
       await db.connect();

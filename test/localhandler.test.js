@@ -18,15 +18,21 @@ describe('aoj-uploads test suite mongoose', async function() {
       let dbTestSuite1 = new Mongo(mongoUri);
       let dbTestSuite2 = new Mongo(mongoUri);
 
-      const { dataModel : dataModel1, apiModel : apiModel1 } = createUploadApiModel({storagePath : './test/var'});
+      const { dataModel : dataModel1, apiModel : apiModel1 } = createUploadApiModel({
+        handlerOptions : {
+          storagePath : './test/var'
+        }
+      });
       const { dataModel : dataModel2, apiModel : apiModel2 } = createUploadApiModel({
         apiName     : 'apiName',
         collection  : 'secondTestTable',
         accept      : 'application/pdf',
         fileField   : 'uploadfilefield',
         maxSize     : 1500000,
-        storagePath : './test/var',
-        attachment  : true
+        attachment  : true,
+        handlerOptions : {
+          storagePath : './test/var',
+        }
       });
 
       await dbTestSuite1.connect();

@@ -37,28 +37,22 @@ const LocalFilesHandler = {
     return uuid;
   },
 
-  get : async (flow, meta, document, options) => {
+  get : async (document, options) => {
     if (!options.storagePath) {
       console.error(
         'uploadModel.getFile(): storage folder not specified. Unable to serve requested file. ' +
         'Please set options.storagePath="/path/to/your/storage/folder/".'
       );
 
-      return flow.stop(404, 'Unable to find storage folder');
+      throw 'Unable to find storage folder';
     }
 
-    const { storageName, name, mime } = document;
+    const { storageName } = document;
 
     const storageFile = `${options.storagePath}/${storageName}`;
     const data        = await readPromise(storageFile);
 
-    const disposition = options.attachment ? `attachment; filename="${encodeURIComponent(name)}"` : 'inline';
-
-    meta.response.headers['Content-Disposition'] = disposition;
-    meta.response.headers['Content-Type'] = mime;
-    meta.response.headers['Cache-Control'] = 'max-age=86400';
-
-    return flow.continue(data);
+    return data;
   },
 
   del : async (document, options) => {

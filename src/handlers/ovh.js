@@ -28,7 +28,7 @@ const OvhObjectStorageHandler = {
     return uuid;
   },
 
-  get : async (flow, meta, document, options) => {
+  get : async (document, options) => {
     (names => {
       names.forEach(name => {
         if (!options[name]) {
@@ -45,20 +45,14 @@ const OvhObjectStorageHandler = {
       region   : options.ovhRegion
     };
 
-    const { storageName, name, mime } = document;
+    const { storageName } = document;
 
 		const storage = new OVHStorage(config);
 
 		await storage.connection();
     const { content } = await storage.objects().get(`/${options.ovhContainer}/${storageName}`);
 
-    const disposition = options.attachment ? `attachment; filename="${encodeURIComponent(name)}"` : 'inline';
-
-    meta.response.headers['Content-Disposition'] = disposition;
-    meta.response.headers['Content-Type'] = mime;
-    meta.response.headers['Cache-Control'] = 'max-age=86400';
-
-    return flow.continue(content);
+    return content;
   },
 
   del : async (document, options) => {

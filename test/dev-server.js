@@ -19,8 +19,10 @@ mongoServer
     accept      : 'application/pdf',
     fileField   : 'uploadfilefield',
     maxSize     : 1500000,
-    storagePath : './test/var',
-    attachment  : true
+    attachment  : true,
+    handlerOptions : {
+      storagePath : './test/var',
+    }
   });
 
   await db.connect();
