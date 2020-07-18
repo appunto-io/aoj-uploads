@@ -64,6 +64,8 @@ options = {
   /*
     API endpoint. Upload api is accessible at http(s)://<domain>/<apiName>.
     Example: https://localhost:8080/uploads
+
+    If this is not defined, it defaults to the value of collection option
   */
   apiName : 'uploads',
 
