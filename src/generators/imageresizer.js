@@ -35,7 +35,7 @@ const ImageResizer = async (file, options) => {
       id,
       width,
       height,
-      fit = 'contain',
+      fit = 'inside',
       position = 'centre',
       format = defaultOutputFormat,
       outputOptions = {},
