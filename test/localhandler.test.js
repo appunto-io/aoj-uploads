@@ -9,7 +9,9 @@ const DummyGenerator = require('../src/generators/dummy');
 const {
   defaultTestSuite,
   testSuiteWithOptions,
-  jwtSecret } = require('./all-generic.js');
+  jwtSecret,
+  TESTMIMETYPE
+} = require('./all-generic.js');
 
 describe('aoj-uploads test suite mongoose', async function() {
   before((done) => {
@@ -28,7 +30,7 @@ describe('aoj-uploads test suite mongoose', async function() {
       const { dataModel : dataModel2, apiModel : apiModel2 } = createUploadApiModel({
         apiName     : 'apiName',
         collection  : 'secondTestTable',
-        accept      : 'application/pdf',
+        accept      : TESTMIMETYPE,
         fileField   : 'uploadfilefield',
         maxSize     : 1500000,
         attachment  : true,

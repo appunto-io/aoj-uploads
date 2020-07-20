@@ -49,7 +49,7 @@ const OvhObjectStorageHandler = {
 
 		await storage.connection();
     const { content } = await storage.objects().get(`/${options.ovhContainer}/${storageName}`);
-
+    
     return content;
   },
 
