@@ -35,7 +35,7 @@
     "md5": "^2.2.1",
     "mustache": "^4.0.1",
     "mv": "^2.1.1",
-    "node-ovh-objectstorage": "github:dimer47/node-ovh-objectstorage#pull/11/head",
+    "node-ovh-objectstorage": "github:dimer47/node-ovh-objectstorage#b072c97777966b55dc6598c459725a752b6b352f",
     "sharp": "^0.25.4",
     "tmp": "^0.2.1",
     "uuid": "^3.3.2"
