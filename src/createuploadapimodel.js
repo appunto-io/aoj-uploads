@@ -24,7 +24,7 @@ function createUploadApiModel(options = {}) {
   apiModel.addModel(renamedApiFromDataModel);
 
   apiModel.addMiddleware(fileUpload({
-    limits: { fileSize: maxSize + 10 }, // Download some spare bite to let library trig the 413 error
+    limits: { fileSize: maxSize + 10 }, // Download some spare bytes to let library trig the 413 error
     useTempFiles: true,
     tempFileDir
   })
