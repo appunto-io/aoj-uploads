@@ -132,9 +132,9 @@ async function defaultTestSuite(defaultsServerPort) {
 
       it('Should retrieve binary', async function() {
         const response = await getBinary(defaultsServerPort, 'uploads', this.fileId);
-        const referenceHash = md5(fs.readFileSync(TESTFILE));
+        const referenceHash = md5(fs.readFileSync(TESTFILE).toString());
 
-        fs.writeFileSync('test.bin', response.body);
+        fs.writeFileSync('test.bin', response.body.toString());
         expect(response).to.have.status(200);
         expect(md5(response.body)).to.equal(referenceHash);
       });
