@@ -3,6 +3,7 @@
   "version": "0.1.4",
   "description": "Uploads model for API on JSON framework",
   "main": "src/index.js",
+  "types":"types/index.d.ts",
   "scripts": {
     "test:local": "mocha './test/localhandler.test.js' --timeout 50000 --exit",
     "test:ovh": "mocha './test/ovhhandler.test.js' --timeout 50000 --exit",
