@@ -30,7 +30,7 @@
     "yargs": "^10.0.3"
   },
   "dependencies": {
-    "@appunto/api-on-json": "^0.2.3",
+    "@appunto/api-on-json": "^0.3.0-7",
     "express-fileupload": "^1.1.7-alpha.4",
     "lodash.kebabcase": "^4.1.1",
     "md5": "^2.2.1",
