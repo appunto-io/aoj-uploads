@@ -2,7 +2,7 @@ const OVHStorage = require('node-ovh-objectstorage');
 const uuidv1     = require('uuid/v1');
 
 const OvhObjectStorageHandler = {
-  store : async (uploadPath, options) => {
+  store : async (uploadPath, options, name) => {
     (names => {
       names.forEach(name => {
         if (!options[name]) {
@@ -19,7 +19,7 @@ const OvhObjectStorageHandler = {
       region   : options.ovhRegion
     };
 
-    const uuid    = uuidv1();
+    const uuid    = name || uuidv1();
 		const storage = new OVHStorage(config);
 
 		await storage.connection();

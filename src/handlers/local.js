@@ -19,7 +19,7 @@ const readPromise = (path) => new Promise((resolve, reject) => {
 
 
 const LocalFilesHandler = {
-  store : async (uploadPath, options) => {
+  store : async (uploadPath, options, name) => {
     const storagePath = options.storagePath || './';
 
     if (!options.storagePath) {
@@ -29,7 +29,7 @@ const LocalFilesHandler = {
       );
     }
 
-    const uuid            = uuidv1();
+    const uuid            = name || uuidv1();
     const destinationPath = `${storagePath}/${uuid}`;
 
     await renamePromise(uploadPath, destinationPath);

@@ -9,7 +9,8 @@ const {
   generateVariants,
   storeFile,
   deleteFile,
-  getFile
+  getFile,
+  handlePost
 } = require('./library.js');
 
 const uploadApiModel = (options = {}) => {
@@ -21,7 +22,8 @@ const uploadApiModel = (options = {}) => {
         'POST' : [
           verifyFile(options),
           generateVariants(options),
-          storeFile(options)
+          storeFile(options),
+          handlePost(options)
         ]
       },
       '/:id' : {

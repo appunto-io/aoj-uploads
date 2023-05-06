@@ -16,6 +16,9 @@ const TESTFILE     = './testimage.jpeg';
 const TESTFILENAME = 'testimage.jpeg';
 const TESTMIMETYPE = 'image/jpeg';
 
+const REPLACETESTFILE1 = './testimage.jpeg';
+const REPLACETESTFILE2 = './test/replace/testimage.jpeg';
+
 /**********************************************
   Generic HTTP requests based on chai HTTP
 */
@@ -88,12 +91,12 @@ async function postFile(port, collection, filePath, fileName, fileField = 'file'
 async function getBinary(port, collection, id, variant) {
   const binaryParser = function (res, cb) {
     res.setEncoding("binary");
-    res.data = "";
+    res.data = new Buffer.from('', 'binary');
     res.on("data", function (chunk) {
-      res.data += chunk;
+      res.data = Buffer.concat([res.data, Buffer.from(chunk, 'binary')]);
     });
     res.on("end", function () {
-      cb(null, new Buffer(res.data, "binary"));
+      cb(null, res.data);
     });
   };
 
@@ -132,9 +135,9 @@ async function defaultTestSuite(defaultsServerPort) {
 
       it('Should retrieve binary', async function() {
         const response = await getBinary(defaultsServerPort, 'uploads', this.fileId);
-        const referenceHash = md5(fs.readFileSync(TESTFILE).toString());
+        const referenceHash = md5(fs.readFileSync(TESTFILE));
 
-        fs.writeFileSync('test.bin', response.body.toString());
+        fs.writeFileSync('test.bin', response.body);
         expect(response).to.have.status(200);
         expect(md5(response.body)).to.equal(referenceHash);
       });
@@ -147,6 +150,14 @@ async function defaultTestSuite(defaultsServerPort) {
         response = await getId(defaultsServerPort, 'uploads', this.fileId);
 
         expect(response).to.have.status(404);
+      })
+
+      it('Should replace files', async function() {
+        let response1 = await postFile(defaultsServerPort, 'uploads', REPLACETESTFILE1, TESTFILENAME);
+        let response2 = await postFile(defaultsServerPort, 'uploads', REPLACETESTFILE2, TESTFILENAME);
+
+        expect(response1.body.id).to.equal(response2.body.id);
+        expect(response1.body.storageName).to.equal(response2.body.storageName);
       })
     });
   });

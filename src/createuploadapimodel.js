@@ -20,6 +20,8 @@ function createUploadApiModel(options = {}) {
     [`/${apiName}`] : apiFromDataModel.get()[`/${kebabCase(options.collection || DEFAULT_NAME)}`]
   };
 
+  renamedApiFromDataModel[`/${apiName}`].handlers['POST'] = []
+
   const apiModel = new ApiModel(uploadApiModel(options));
   apiModel.addModel(renamedApiFromDataModel);
 

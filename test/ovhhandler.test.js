@@ -18,6 +18,7 @@ describe('aoj-uploads test suite mongoose', async function() {
       let db = new Mongo(mongoUri);
 
       const { dataModel, apiModel } = createUploadApiModel({
+        replace : true,
         handler : OvhObjectStorageHandler,
         handlerOptions : {
           ovhUsername  : process.env.OVH_USERNAME,

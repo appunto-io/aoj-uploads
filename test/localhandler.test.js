@@ -23,8 +23,9 @@ describe('aoj-uploads test suite mongoose', async function() {
       let dbTestSuite2 = new Mongo(mongoUri);
 
       const { dataModel : dataModel1, apiModel : apiModel1 } = createUploadApiModel({
+        replace : true,
         handlerOptions : {
-          storagePath : './test/var'
+          storagePath : './test/var',
         }
       });
       const { dataModel : dataModel2, apiModel : apiModel2 } = createUploadApiModel({

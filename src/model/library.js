@@ -16,8 +16,11 @@ that the mime type is allowed.
 const verifyFile = (options) => async (data, flow, meta) => {
   console.info('uploadModel.verifyFile()');
 
-  let {accept, fileField, maxSize} = options;
+  let {accept, fileField, maxSize, collection, replace} = options;
+  const { db } = meta.environment || {};
 
+
+  collection = collection || DEFAULT_NAME;
   fileField = fileField || DEFAULT_FIELD;
 
   if (accept) {
@@ -66,14 +69,21 @@ const verifyFile = (options) => async (data, flow, meta) => {
     return flow.stop(415, `File format '${file.mimetype}' is not allowed. Accepted formats are : ${accept.join(', ')}`);
   }
 
-  return flow.continue({ file });
+  let existing;
+  if(replace) {
+    const {documents} = await db.readMany(collection, {name : file.name});
+    existing = documents[0];
+  }
+
+
+  return flow.continue({ file, existing });
 };
 
 /*
   Generate different variants of uploaded file if a generator is provided
 */
 const generateVariants = (options) => async (data, flow, meta) => {
-  const { file } = data;
+  const { file, existing } = data;
   let variants = [], cleanup = () => {};
 
   if (options.generator) {
@@ -87,7 +97,7 @@ const generateVariants = (options) => async (data, flow, meta) => {
     }
   }
 
-  return flow.continue({file, variants, variantsCleanup : cleanup});
+  return flow.continue({file, variants, variantsCleanup : cleanup, existing});
 };
 
 /*
@@ -97,19 +107,20 @@ const storeFile = (options) => async (data, flow, meta) => {
   console.info('uploadModel.storeFile()');
 
   let handler = options.handler;
+  const replace = options.replace;
 
   if (!handler) {
     console.warn('uploadModel.storeFile(): Upload handler is not defined, using default LocalFilesHandler');
     handler = LocalFilesHandler;
   }
 
-  const { file, variants = [], variantsCleanup = () => {} } = data;
+  const { file, variants = [], variantsCleanup = () => {}, existing } = data;
   const ownerId    = meta.auth.accountId || null;
 
   try {
-    const storageName = await handler.store(file.tempFilePath, options.handlerOptions || {});
+    const storageName = await handler.store(file.tempFilePath, options.handlerOptions || {}, replace && existing ? existing.storageName : null);
     const variantsNames = await Promise.all(variants.map(
-      variant => handler.store(variant.tempFilePath, options.handlerOptions || {})
+      variant => handler.store(variant.tempFilePath, options.handlerOptions || {}, replace && existing ? existing.variants?.find(({variantId}) => variantId === variant.variantId)?.storageName || null : null)
     ));
 
     // Cleanup before continuing
@@ -121,7 +132,7 @@ const storeFile = (options) => async (data, flow, meta) => {
       console.warn(`uploadModel.storeFile(): cleanup failed due to following error: ${error}`);
     }
 
-    return flow.continue({
+    const result = {
       name        : file.name,
       ownerId     : ownerId,
       storageName : storageName,
@@ -134,7 +145,13 @@ const storeFile = (options) => async (data, flow, meta) => {
         size        : variant.size,
         mimetype    : variant.mimetype || file.mimetype
       }))
-    });
+    }
+
+    if(replace && existing) {
+      result.id = existing.id;
+    }
+
+    return flow.continue(result);
   }
   catch (error) {
     console.error(`uploadModel.storeFile(): the following error occurred during file upload: ${error}`);
@@ -142,6 +159,26 @@ const storeFile = (options) => async (data, flow, meta) => {
     return flow.stop(400, 'Unable to store uploaded file');
   }
 };
+
+const handlePost = (options) => async (data, flow, meta) => {
+  console.info('uploadModel.handlePost()');
+
+  let {collection, replace} = options;
+  const { db } = meta.environment || {};
+
+  collection = collection || DEFAULT_NAME;
+  const {id, ...rest} = data;
+
+  let result;
+  if(replace && id) {
+    result = await db.patch(collection, id, rest);
+  }
+  else {
+    result = await db.create(collection, rest);
+  }
+
+  return flow.continue(result);
+}
 
 /*
  Retrieve file
@@ -242,6 +279,7 @@ module.exports = {
   verifyFile,
   generateVariants,
   storeFile,
+  handlePost,
   deleteFile,
   getFile
 }
