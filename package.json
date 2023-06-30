@@ -1,6 +1,6 @@
 {
   "name": "@appunto/aoj-uploads",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Uploads model for API on JSON framework",
   "main": "src/index.js",
   "types": "types/index.d.ts",
