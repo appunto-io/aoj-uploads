@@ -118,9 +118,24 @@ const storeFile = (options) => async (data, flow, meta) => {
   const ownerId    = meta.auth.accountId || null;
 
   try {
-    const storageName = await handler.store(file.tempFilePath, options.handlerOptions || {}, replace && existing ? existing.storageName : null);
+    const storageName = await handler.store(file.tempFilePath, options.handlerOptions || {}, replace && existing ? existing.storageName : null, {
+      mimetype : file.mimetype,
+      size : file.size,
+      name : file.name,
+      replace,
+      ownerId,
+      tmpFile : file.tempFilePath
+    });
     const variantsNames = await Promise.all(variants.map(
-      variant => handler.store(variant.tempFilePath, options.handlerOptions || {}, replace && existing ? existing.variants?.find(({variantId}) => variantId === variant.variantId)?.storageName || null : null)
+      variant => handler.store(variant.tempFilePath, options.handlerOptions || {}, replace && existing ? existing.variants?.find(({variantId}) => variantId === variant.variantId)?.storageName || null : null, {
+        mimetype : file.mimetype,
+        size : file.size,
+        name : file.name,
+        replace,
+        ownerId,
+        tmpFile : variant.tempFilePath,
+        variantId : variant.variantId
+      })
     ));
 
     // Cleanup before continuing
